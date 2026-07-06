@@ -1,0 +1,432 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Lightning Contact Scraper</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='scraper.css') }}">
+  <script src="{{ url_for('static', filename='scraper.js') }}" defer></script>
+</head>
+<body>
+  <main class="shell">
+    <header class="topbar">
+      <div>
+        <p class="eyebrow">Public website data</p>
+        <h1>Lightning Contact Scraper</h1>
+        <p class="subhead">Upload company names or websites, choose the data you need, and download clean results.</p>
+      </div>
+      <span id="statusBadge" class="badge" data-state="idle">Ready</span>
+    </header>
+
+    <section class="setup-grid">
+      <article class="card">
+        <div class="card-head">
+          <div>
+            <span class="step">1</span>
+            <h2>Add Companies or Websites</h2>
+          </div>
+          <span class="hint">CSV or direct paste</span>
+        </div>
+
+        <div class="input-switch" role="radiogroup" aria-label="Website input method">
+          <label>
+            <input type="radio" name="inputType" value="csv" checked>
+            <span>Upload CSV</span>
+          </label>
+          <label>
+            <input type="radio" name="inputType" value="paste">
+            <span>Paste Input</span>
+          </label>
+        </div>
+
+        <form id="uploadForm" class="input-panel">
+          <label id="dropZone" class="drop-zone" for="fileInput">
+            <input id="fileInput" type="file" accept=".csv,text/csv" hidden>
+            <strong id="fileLabel">Choose CSV file</strong>
+            <span id="fileHint">Website column, or Company with optional Location</span>
+          </label>
+          <button id="uploadButton" class="button primary" type="submit">Upload CSV</button>
+        </form>
+
+        <form id="pasteForm" class="input-panel paste-panel" hidden>
+          <div class="paste-grid">
+            <section class="paste-box">
+              <label for="websitePaste">Paste websites</label>
+              <textarea id="websitePaste" rows="7" placeholder="example.com&#10;https://company.com&#10;another-site.org"></textarea>
+              <div class="paste-footer">
+                <span id="websitePasteCount">0 entries</span>
+                <button id="websitePasteButton" class="button primary" type="button">Use Websites</button>
+              </div>
+            </section>
+            <section class="paste-box">
+              <label for="companyPaste">Paste company names</label>
+              <textarea id="companyPaste" rows="7" placeholder="Red Peak Technical Services, LLC&#10;Acme Industrial Supply&#10;Company,Location&#10;Example Co,Dallas"></textarea>
+              <div class="paste-footer">
+                <span id="companyPasteCount">0 entries</span>
+                <button id="companyPasteButton" class="button primary" type="button">Use Companies</button>
+              </div>
+            </section>
+          </div>
+        </form>
+        <div id="fileInfo" class="file-info muted">No file uploaded.</div>
+      </article>
+
+      <article class="card">
+        <div class="card-head">
+          <div>
+          <span class="step">2</span>
+            <h2>Data to Find</h2>
+          </div>
+          <span class="hint">Website plus details</span>
+        </div>
+
+        <div class="checkbox-group">
+          <label class="check-field">
+            <input type="checkbox" name="extractKind" value="website" checked>
+            <span>Websites</span>
+          </label>
+          <label class="check-field">
+            <input type="checkbox" name="extractKind" value="email" checked>
+            <span>Emails</span>
+          </label>
+          <label class="check-field">
+            <input type="checkbox" name="extractKind" value="phone" checked>
+            <span>Phone numbers</span>
+          </label>
+          <label class="check-field">
+            <input type="checkbox" name="extractKind" value="social" checked>
+            <span>Social links</span>
+          </label>
+          <label class="check-field">
+            <input type="checkbox" name="extractKind" value="details" checked>
+            <span>Addresses & descriptions</span>
+          </label>
+        </div>
+        <p class="selection-note"><strong>Websites</strong> finds the official site from company names. The other choices scrape that site after it is verified.</p>
+
+        <label class="field compact">
+          <span>Concurrent websites</span>
+          <input id="workers" type="number" min="1" max="100" value="40">
+        </label>
+      </article>
+    </section>
+
+    <section class="card clean-card">
+      <div class="card-head">
+        <div>
+          <span class="step">3</span>
+          <h2>Clean CSV</h2>
+        </div>
+        <span class="hint">One best value per column</span>
+      </div>
+
+      <div class="clean-layout">
+        <div class="clean-section">
+          <div class="section-title-row">
+            <h3>Columns to Keep</h3>
+            <p>These are the columns in the simple cleaned download.</p>
+          </div>
+          <div class="checkbox-group clean-field-grid" aria-label="Clean CSV fields">
+            <label class="check-field">
+              <input type="checkbox" name="cleanField" value="website" checked>
+              <span>Website</span>
+            </label>
+            <label class="check-field">
+              <input type="checkbox" name="cleanField" value="email" checked>
+              <span>Email</span>
+            </label>
+            <label class="check-field">
+              <input type="checkbox" name="cleanField" value="phone" checked>
+              <span>Phone number</span>
+            </label>
+            <label class="check-field">
+              <input type="checkbox" name="cleanField" value="facebook" checked>
+              <span>Facebook</span>
+            </label>
+            <label class="check-field">
+              <input type="checkbox" name="cleanField" value="instagram">
+              <span>Instagram</span>
+            </label>
+            <label class="check-field">
+              <input type="checkbox" name="cleanField" value="linkedin">
+              <span>LinkedIn</span>
+            </label>
+            <label class="check-field">
+              <input type="checkbox" name="cleanField" value="twitter_x">
+              <span>X/Twitter</span>
+            </label>
+            <label class="check-field">
+              <input type="checkbox" name="cleanField" value="youtube">
+              <span>YouTube</span>
+            </label>
+            <label class="check-field">
+              <input type="checkbox" name="cleanField" value="tiktok">
+              <span>TikTok</span>
+            </label>
+            <label class="check-field">
+              <input type="checkbox" name="cleanField" value="pinterest">
+              <span>Pinterest</span>
+            </label>
+            <label class="check-field">
+              <input type="checkbox" name="cleanField" value="threads">
+              <span>Threads</span>
+            </label>
+            <label class="check-field">
+              <input type="checkbox" name="cleanField" value="address">
+              <span>Address</span>
+            </label>
+            <label class="check-field">
+              <input type="checkbox" name="cleanField" value="description">
+              <span>Description</span>
+            </label>
+          </div>
+        </div>
+
+        <div class="option-stack">
+          <div class="clean-section phone-options">
+            <div class="section-title-row">
+              <h3>Phone Cleanup</h3>
+              <p id="phoneOptionsNote">Used only when Phone number is selected.</p>
+            </div>
+            <label class="field">
+              <span>Country</span>
+              <select id="cleanPhoneRegion">
+                <option value="AUTO">Auto-detect</option>
+                <option value="AU">Australia</option>
+                <option value="US">United States</option>
+                <option value="IN">India</option>
+                <option value="KR">South Korea</option>
+              </select>
+            </label>
+            <label class="field">
+              <span>Phone format</span>
+              <select id="cleanPhoneFormat">
+                <option value="national">Local / National</option>
+                <option value="international">International</option>
+                <option value="e164">E.164</option>
+              </select>
+            </label>
+          </div>
+
+          <details class="advanced-options">
+            <summary>
+              <span>
+                <strong>Advanced Accuracy</strong>
+                <small id="advancedSummary">Balanced defaults</small>
+              </span>
+            </summary>
+            <div class="advanced-grid">
+              <label class="field">
+                <span>Phone country confidence</span>
+                <select id="phoneCountryConfidence">
+                  <option value="strict">Strict</option>
+                  <option value="balanced">Balanced</option>
+                  <option value="loose">Loose</option>
+                </select>
+                <small class="field-help">Strict leaves uncertain local numbers blank.</small>
+              </label>
+              <label class="field">
+                <span>Email preference</span>
+                <select id="emailPreference">
+                  <option value="business">Business inbox</option>
+                  <option value="named">Named person</option>
+                  <option value="highest">Highest confidence</option>
+                </select>
+                <small class="field-help">Business inbox prefers contact, info, sales, and office emails.</small>
+              </label>
+              <label class="field">
+                <span>Fast Mode quality</span>
+                <select id="fastQuality">
+                  <option value="balanced">Balanced</option>
+                  <option value="strict">Strict</option>
+                  <option value="loose">Loose</option>
+                </select>
+                <small class="field-help">Balanced avoids stopping on weak visible-text matches.</small>
+              </label>
+              <label class="check-field evidence-toggle">
+                <input id="includeEvidenceColumns" type="checkbox">
+                <span>Include evidence columns</span>
+              </label>
+              <label class="check-field evidence-toggle">
+                <input id="enableMxCheck" type="checkbox">
+                <span>Check email domains</span>
+              </label>
+            </div>
+          </details>
+        </div>
+      </div>
+
+      <div class="output-summary">
+        <strong>Output summary</strong>
+        <p id="cleanOutputNote">Clean CSV keeps one best value for each selected column.</p>
+      </div>
+    </section>
+
+    <section class="card depth-card">
+      <div class="card-head">
+        <div>
+          <span class="step">4</span>
+          <h2>Scraping Mode</h2>
+        </div>
+        <span class="hint">Control speed versus depth</span>
+      </div>
+
+      <div class="depth-switch" role="radiogroup" aria-label="Website scraping depth">
+        <label>
+          <input type="radio" name="crawlMode" value="fast" checked>
+          <span>
+            <strong>Fast Mode</strong>
+            <small>Stops when the selected clean fields meet the quality target.</small>
+          </span>
+        </label>
+        <label>
+          <input type="radio" name="crawlMode" value="full">
+          <span>
+            <strong>Full Website Scan</strong>
+            <small>Checks more internal pages for the strongest available data.</small>
+          </span>
+        </label>
+      </div>
+
+      <div class="depth-note">
+        <p id="depthDescription"><strong>Fast:</strong> starts at the homepage and avoids extra requests once all selected data is found.</p>
+        <label class="field page-limit">
+          <span>Maximum pages per website</span>
+          <input id="maxPages" type="number" min="1" max="20" value="6">
+        </label>
+      </div>
+    </section>
+
+    <section class="card run-card">
+      <div class="card-head">
+        <div>
+          <span class="step">5</span>
+          <h2>Run Scraper</h2>
+        </div>
+        <span id="runMessage" class="hint">Add companies or websites to begin</span>
+      </div>
+
+      <div class="controls">
+        <button id="startButton" class="button primary" type="button" disabled>Start Scraping</button>
+        <button id="pauseButton" class="button secondary" type="button" disabled>Pause</button>
+        <button id="stopButton" class="button danger" type="button" disabled>Stop</button>
+      </div>
+
+      <div class="progress-row">
+        <strong id="progressLabel">0%</strong>
+        <span id="currentStatus">Waiting to start</span>
+        <span id="etaLabel">ETA --</span>
+      </div>
+      <div id="progressTrack" class="progress-track" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+        <div id="progressBar" class="progress-bar"></div>
+      </div>
+
+      <div class="metrics">
+        <div><span>Processed</span><strong id="processedMetric">0 / 0</strong></div>
+        <div><span>Websites</span><strong id="websitesMetric">0</strong></div>
+        <div><span>Success</span><strong id="successMetric">0</strong></div>
+        <div><span>Failed</span><strong id="failedMetric">0</strong></div>
+        <div><span>Extracted</span><strong id="extractedMetric">0</strong></div>
+      </div>
+    </section>
+
+    <details class="card settings-card">
+      <summary>
+        <span>
+          <strong>Fallback & Search Settings</strong>
+          <small>Optional Bright Data fallback and free SearXNG search</small>
+        </span>
+        <span id="brightSettingsState" class="settings-state">Loading...</span>
+      </summary>
+      <form id="brightSettingsForm">
+        <div class="settings-grid">
+          <label class="field">
+            <span>Web Unlocker Zone Name</span>
+            <input id="unlockerZone" type="text" autocomplete="off" placeholder="web_unlocker1">
+          </label>
+          <label class="field">
+            <span>Web Unlocker API Key</span>
+            <input id="apiKey" type="password" autocomplete="new-password" placeholder="Leave blank to keep current">
+          </label>
+          <label class="field">
+            <span>Bright Data Username</span>
+            <input id="browserUsername" type="text" autocomplete="off">
+          </label>
+          <label class="field">
+            <span>Bright Data Password</span>
+            <input id="browserPassword" type="password" autocomplete="new-password" placeholder="Leave blank to keep current">
+          </label>
+          <label class="field">
+            <span>Proxy / Browser Host</span>
+            <input id="proxyHost" type="text" autocomplete="off" placeholder="brd.superproxy.io">
+          </label>
+          <label class="field">
+            <span>Proxy / Browser Port</span>
+            <input id="proxyPort" type="number" min="1" max="65535" value="9222">
+          </label>
+          <label class="field">
+            <span>Browser fallback concurrency</span>
+            <input id="browserConcurrency" type="number" min="1" max="20" value="3">
+          </label>
+          <label class="field">
+            <span>Free search source (SearXNG)</span>
+            <input id="searxngBaseUrl" type="url" autocomplete="off" placeholder="https://search.example.com">
+            <small class="field-help">Optional URL for better company-name website finding.</small>
+          </label>
+        </div>
+        <div class="settings-actions">
+          <label class="check-field">
+            <input id="useWebUnlocker" type="checkbox" checked>
+            <span>Use Web Unlocker when direct requests fail</span>
+          </label>
+          <label class="check-field">
+            <input id="useBrowser" type="checkbox" checked>
+            <span>Use Browser API as the final fallback</span>
+          </label>
+          <button id="saveBrightSettings" class="button primary" type="submit">Save Settings</button>
+        </div>
+        <p id="brightSettingsMessage" class="settings-message muted">Secrets are stored only in this app's local data folder and are never displayed back.</p>
+      </form>
+    </details>
+
+    <section id="completionCard" class="card completion" hidden>
+      <div class="completion-head">
+        <div>
+          <p class="eyebrow">Run complete</p>
+          <h2 id="completionTitle">Scraping completed</h2>
+          <p id="completionText">Your output files are ready.</p>
+        </div>
+        <div id="downloads" class="downloads"></div>
+      </div>
+      <div class="summary-grid">
+        <div><span>Websites processed</span><strong id="summaryProcessed">0</strong></div>
+        <div><span>Websites found</span><strong id="summaryWebsites">0</strong></div>
+        <div><span>Emails found</span><strong id="summaryEmails">0</strong></div>
+        <div><span>Phone numbers</span><strong id="summaryPhones">0</strong></div>
+        <div><span>Social links</span><strong id="summarySocials">0</strong></div>
+        <div id="summaryRecoveredRow" hidden><span>Recovered via Bright Data</span><strong id="summaryRecovered">0</strong></div>
+        <div><span>Failed URLs</span><strong id="summaryFailed">0</strong></div>
+      </div>
+    </section>
+
+    <section id="retryPromptCard" class="card retry-card" hidden>
+      <div class="retry-head">
+        <div>
+          <p class="eyebrow">Anti-bot fallback</p>
+          <h2 id="retryPromptTitle">Failed Websites Detected</h2>
+          <p id="retryPromptText">Scraping complete, but some websites failed. Do you want to run Bright Data to bypass blocks and retry failed URLs?</p>
+        </div>
+      </div>
+      <div class="retry-actions">
+        <button id="retryYesButton" class="button primary" type="button">Yes, retry failed URLs with Bright Data</button>
+        <button id="retryNoButton" class="button secondary" type="button">No, finish run</button>
+      </div>
+    </section>
+
+    <details class="card logs-card">
+      <summary>Activity log</summary>
+      <pre id="logs">No run started.</pre>
+    </details>
+  </main>
+</body>
+</html>

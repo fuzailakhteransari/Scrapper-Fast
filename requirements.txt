@@ -1,0 +1,12 @@
+aiohttp>=3.10,<4
+beautifulsoup4>=4.12,<5
+flask>=3.1,<4
+lxml>=5,<7
+phonenumbers>=8.13,<10
+python-dotenv>=1,<2
+tldextract>=5,<6
+
+# Optional integrations used when configured:
+gspread>=6,<7
+google-auth>=2,<3
+playwright>=1.50,<2
